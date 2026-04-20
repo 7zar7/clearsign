@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearSign — AI Contract Review for Canadian & US Law</title>
+  <meta name="description" content="Upload any contract and get plain English explanations, risk flags, and exact suggested changes in 60 seconds. Built for Canadian and US law." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #0A0A0F;
+      --accent: #4F4FB9;
+      --accent-hover: #6363CC;
+      --card: #13131A;
+      --border: #1E1E2E;
+      --muted: #94A3B8;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID BACKGROUND ── */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,79,185,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,79,185,0.07) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+      pointer-events: none;
+    }
+
+    /* ── FLOATING PARTICLES ── */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(79,79,185,0.5);
+      animation: float linear infinite;
+      pointer-events: none;
+    }
+    @keyframes float {
+      0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 0.6; }
+      100% { transform: translateY(-120vh) translateX(40px) scale(0.4); opacity: 0; }
+    }
+
+    /* ── GRADIENT TEXT ── */
+    .gradient-text {
+      background: linear-gradient(135deg, #4F4FB9 0%, #818CF8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── GLASSMORPHISM ── */
+    .glass {
+      background: rgba(19,19,26,0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+    }
+
+    /* ── NAV ── */
+    #main-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
+    }
+    #main-nav.scrolled {
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: scale(1.02);
+      box-shadow: 0 0 15px rgba(79,79,185,0.5), 0 0 30px rgba(79,79,185,0.2), 0 8px 20px rgba(79,79,185,0.3);
+    }
+    .btn-primary:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 20px rgba(79,79,185,0.8), 0 0 40px rgba(79,79,185,0.4), inset 0 0 10px rgba(255,255,255,0.1);
+      background: var(--accent);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: #fff;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      background: rgba(79,79,185,0.08);
+      transform: scale(1.02);
+      box-shadow: 0 0 12px rgba(79,79,185,0.4), 0 0 24px rgba(79,79,185,0.15);
+    }
+    .btn-ghost:active {
+      transform: scale(0.97);
+      box-shadow: 0 0 18px rgba(79,79,185,0.6), 0 0 36px rgba(79,79,185,0.25), inset 0 0 8px rgba(255,255,255,0.05);
+    }
+
+    /* ── ACCENT BLOCK ── */
+    .accent-block {
+      background: linear-gradient(135deg, rgba(79,79,185,0.15) 0%, rgba(129,140,248,0.08) 100%);
+      border: 1px solid rgba(79,79,185,0.3);
+    }
+
+    /* btn-primary/ghost as <a> tags need inline-block for transform */
+    a.btn-primary, a.btn-ghost { display: inline-block; text-align: center; }
+
+    /* ── PRICING CARD ── */
+    .pricing-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .pricing-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      border-color: var(--accent);
+    }
+    .pricing-card.featured {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, rgba(79,79,185,0.12) 0%, var(--card) 100%);
+      box-shadow: 0 0 40px rgba(79,79,185,0.2);
+    }
+
+    /* ── FAQ ── */
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.25s ease;
+    }
+    .faq-answer.open {
+      max-height: 300px;
+    }
+    .faq-icon {
+      transition: transform 0.3s ease;
+    }
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    /* ── MOCKUP CARD ── */
+    .mockup-card {
+      animation: floatCard 3s ease-in-out infinite;
+      transition: box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+    .mockup-card:hover {
+      box-shadow: 0 0 0 1px rgba(79,79,185,0.6), 0 0 20px rgba(79,79,185,0.4), 0 0 50px rgba(79,79,185,0.15);
+      border-color: rgba(79,79,185,0.6);
+      animation-play-state: paused;
+    }
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50%       { transform: translateY(-8px) rotate(-1deg); }
+    }
+    .risk-high {
+      background: rgba(239,68,68,0.15); color: #f87171;
+      border: 1px solid rgba(239,68,68,0.3);
+      transition: box-shadow 0.25s ease;
+    }
+    .risk-med {
+      background: rgba(245,158,11,0.15); color: #fbbf24;
+      border: 1px solid rgba(245,158,11,0.3);
+      transition: box-shadow 0.25s ease;
+    }
+    .risk-low {
+      background: rgba(34,197,94,0.15); color: #4ade80;
+      border: 1px solid rgba(34,197,94,0.3);
+      transition: box-shadow 0.25s ease;
+    }
+    /* Clause cards inside mockup: hover glow by color */
+    .clause-card-high { transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+    .clause-card-high:hover {
+      box-shadow: 0 0 14px rgba(239,68,68,0.35);
+      border-color: rgba(239,68,68,0.5) !important;
+    }
+    .clause-card-med { transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+    .clause-card-med:hover {
+      box-shadow: 0 0 14px rgba(245,158,11,0.35);
+      border-color: rgba(245,158,11,0.5) !important;
+    }
+    .clause-card-low { transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+    .clause-card-low:hover {
+      box-shadow: 0 0 14px rgba(34,197,94,0.35);
+      border-color: rgba(34,197,94,0.5) !important;
+    }
+
+    /* ── PROBLEM CARDS hover glow ── */
+    .pain-card {
+      transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+    }
+    .pain-card:hover {
+      box-shadow: 0 0 0 1px rgba(79,79,185,0.4), 0 0 24px rgba(79,79,185,0.2);
+      border-color: rgba(79,79,185,0.4) !important;
+      transform: translateY(-3px);
+    }
+
+    /* ── SUCCESS STATE ── */
+    .form-success-state {
+      display: none;
+      background: rgba(34,197,94,0.08);
+      border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .form-success-state.show { display: flex; align-items: flex-start; gap: 12px; }
+
+    /* ── COUNTDOWN ── */
+    .countdown-block {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .countdown-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(79,79,185,0.1);
+      border: 1px solid rgba(79,79,185,0.25);
+      border-radius: 12px;
+      padding: 14px 18px;
+      min-width: 72px;
+    }
+    .countdown-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #818CF8;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .countdown-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    /* ── MOBILE MENU ── */
+    #mobile-menu {
+      display: none;
+      position: fixed;
+      top: 65px; left: 0; right: 0;
+      z-index: 99;
+      background: rgba(10,10,15,0.97);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem;
+    }
+    #mobile-menu.open { display: block; }
+
+    /* ── STEP NUMBER ── */
+    .step-number {
+      background: linear-gradient(135deg, #4F4FB9, #818CF8);
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    /* ── PILL BADGE ── */
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(79,79,185,0.15);
+      border: 1px solid rgba(79,79,185,0.4);
+      color: #818CF8;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    /* ── EMAIL INPUT ── */
+    .email-input {
+      background: rgba(19,19,26,0.8);
+      border: 1px solid var(--border);
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .email-input::placeholder { color: var(--muted); }
+    .email-input:focus { border-color: var(--accent); }
+
+    /* ── SECTION DIVIDER ── */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    /* ── SUCCESS MSG ── */
+    .success-msg {
+      display: none;
+      background: rgba(34,197,94,0.12);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #4ade80;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.875rem;
+      margin-top: 10px;
+    }
+    .success-msg.show { display: block; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── HERO ENTRANCE — pure CSS, no JS dependency ── */
+    @keyframes heroRise {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes heroFade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    #hero-h1        { animation: heroRise 0.75s cubic-bezier(0.16,1,0.3,1) 0.10s both; }
+    #hero-sub       { animation: heroRise 0.70s cubic-bezier(0.16,1,0.3,1) 0.28s both; }
+    #hero-ctas      { animation: heroRise 0.65s cubic-bezier(0.16,1,0.3,1) 0.42s both; }
+    #hero-email-row { animation: heroRise 0.65s cubic-bezier(0.16,1,0.3,1) 0.54s both; }
+    #hero-proof     { animation: heroFade 0.55s ease-out 0.70s both; }
+
+    /* ── AOS VISIBILITY GUARANTEE ──
+       AOS stylesheet uses [data-aos][data-aos] (specificity 0,2,0) to set opacity:0.
+       Triple-attribute selector (0,3,0) beats it, ensuring content is ALWAYS visible
+       even if the AOS CDN is slow or blocked. AOS animations still run when JS loads —
+       they just fade in from already-visible rather than hidden. */
+    [data-aos][data-aos][data-aos] {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: opacity 0.6s ease, transform 0.6s ease !important;
+    }
+
+    /* How it works: connector line between steps */
+    .steps-connector {
+      position: absolute;
+      top: 24px;
+      left: calc(16.66% + 24px);
+      right: calc(16.66% + 24px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), #818CF8);
+      opacity: 0.25;
+      pointer-events: none;
+    }
+    @media (max-width: 767px) { .steps-connector { display: none; } }
+
+    /* How it works section bg */
+    #how-it-works {
+      background: linear-gradient(180deg, rgba(79,79,185,0.04) 0%, transparent 60%);
+    }
+
+    /* Larger step icons */
+    .step-icon-box {
+      width: 80px; height: 80px;
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(19,19,26,0.8);
+      border: 1px solid var(--border);
+      box-shadow: 0 0 30px rgba(79,79,185,0.15);
+      position: relative;
+    }
+    .step-icon-box::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 21px;
+      background: linear-gradient(135deg, rgba(79,79,185,0.4), transparent 60%);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAV
+═══════════════════════════════════════════ -->
+<nav id="main-nav" class="w-full py-4 px-6 md:px-12">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2 no-underline">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--accent);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <span class="text-white text-xl" style="font-weight:700;">ClearSign</span>
+    </a>
+
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#how-it-works" class="text-sm transition-colors hover:text-white" style="color:var(--muted); text-decoration:none;">How it works</a>
+      <a href="#pricing" class="text-sm transition-colors hover:text-white" style="color:var(--muted); text-decoration:none;">Pricing</a>
+      <a href="#faq" class="text-sm transition-colors hover:text-white" style="color:var(--muted); text-decoration:none;">FAQ</a>
+    </div>
+
+    <div class="hidden md:flex items-center gap-3">
+      <a href="#waitlist" class="btn-primary text-sm font-semibold px-5 py-2.5 rounded-lg no-underline">Try Free</a>
+    </div>
+
+    <button id="hamburger" class="md:hidden flex flex-col gap-1.5 p-2" aria-label="Menu">
+      <span class="w-6 h-0.5 bg-white block transition-all"></span>
+      <span class="w-6 h-0.5 bg-white block transition-all"></span>
+      <span class="w-6 h-0.5 bg-white block transition-all"></span>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu" role="dialog" aria-label="Mobile navigation">
+  <div class="flex flex-col gap-5">
+    <a href="#how-it-works" class="text-white text-base font-medium" onclick="closeMobileMenu()">How it works</a>
+    <a href="#pricing" class="text-white text-base font-medium" onclick="closeMobileMenu()">Pricing</a>
+    <a href="#faq" class="text-white text-base font-medium" onclick="closeMobileMenu()">FAQ</a>
+    <a href="#waitlist" class="btn-primary text-sm font-semibold px-5 py-3 rounded-lg text-center" onclick="closeMobileMenu()">Try Free</a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════ -->
+<section id="hero" class="relative min-h-screen flex items-center overflow-hidden" style="padding-top:72px;">
+  <div class="hero-grid"></div>
+  <div id="particles-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full pointer-events-none" style="background:radial-gradient(ellipse, rgba(79,79,185,0.18) 0%, transparent 70%);"></div>
+
+  <div class="max-w-7xl mx-auto px-6 md:px-12 w-full py-12">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="flex flex-col gap-6">
+        <div id="hero-h1">
+          <div class="badge-pill mb-4">
+            <!-- Canadian maple leaf -->
+            <svg width="15" height="15" viewBox="0 0 100 100" fill="#e53e3e" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+              <path d="M50 5 L54 30 L75 18 L65 38 L90 42 L72 55 L80 75 L55 65 L55 95 L45 95 L45 65 L20 75 L28 55 L10 42 L35 38 L25 18 L46 30 Z"/>
+            </svg>
+            Built for Canadian &amp; US Law
+          </div>
+          <h1 id="hero-title" class="text-4xl md:text-5xl xl:text-6xl leading-tight tracking-tight" style="font-weight:800; min-height:3.6em;"></h1>
+        </div>
+
+        <p id="hero-sub" class="text-base md:text-lg leading-relaxed" style="color:var(--muted); max-width:520px;">
+          Upload any contract. Get plain English. Know the risks. <strong style="color:#fff;">In 60 seconds.</strong>
+        </p>
+
+        <div id="hero-ctas" class="flex flex-wrap gap-3">
+          <a href="#waitlist" class="btn-primary text-sm font-semibold px-6 py-3 rounded-lg no-underline">Analyze my contract free</a>
+          <a href="#how-it-works" class="btn-ghost text-sm font-semibold px-6 py-3 rounded-lg no-underline flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            See how it works
+          </a>
+        </div>
+
+        <div id="hero-email-row" style="max-width:480px;">
+          <form id="hero-form" class="flex gap-2" onsubmit="handleSignup(event,'hero')">
+            <input type="email" id="hero-email" placeholder="Enter your email" required
+              class="email-input flex-1 px-4 py-3 rounded-lg text-sm" />
+            <button type="submit" class="btn-primary text-sm font-semibold px-5 py-3 rounded-lg whitespace-nowrap">Get early access</button>
+          </form>
+          <div id="hero-success" class="form-success-state mt-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div>
+              <p class="text-sm font-semibold" style="color:#4ade80;">You're on the list!</p>
+              <p class="text-xs mt-0.5" style="color:#86efac;">We'll email you the moment ClearSign launches. You're <strong id="hero-position">#248</strong> in line.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="hero-proof" class="flex items-center gap-3">
+          <div class="flex -space-x-2">
+            <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold" style="background:#4F4FB9;border-color:var(--bg);">A</div>
+            <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold" style="background:#6363CC;border-color:var(--bg);">S</div>
+            <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold" style="background:#818CF8;border-color:var(--bg);">M</div>
+          </div>
+          <p class="text-sm" style="color:var(--muted);">
+            <strong class="text-white" id="waitlist-count-hero">247</strong> people already getting early access
+          </p>
+        </div>
+      </div>
+
+      <!-- Mockup -->
+      <div class="hidden lg:flex items-center justify-center">
+        <div class="mockup-card glass rounded-2xl p-5 w-full max-w-[420px]" style="transform:rotate(-1deg);">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="text-xs font-semibold mb-0.5" style="color:var(--muted);">CONTRACT ANALYSIS</div>
+              <div class="text-sm font-semibold text-white">Software Freelance Agreement.pdf</div>
+              <div class="text-xs mt-0.5" style="color:var(--muted);">PDF · Word · Image · Any contract</div>
+            </div>
+            <div class="flex gap-1.5">
+              <span class="risk-high text-xs font-bold px-2.5 py-1 rounded-full">HIGH</span>
+              <span class="risk-med text-xs font-bold px-2.5 py-1 rounded-full">2 MED</span>
+            </div>
+          </div>
+
+          <div class="rounded-full h-1.5 mb-4 overflow-hidden" style="background:var(--border);">
+            <div class="h-full rounded-full" style="background:linear-gradient(90deg,#4F4FB9,#818CF8);width:100%;animation:progress 1.8s ease-out forwards;"></div>
+          </div>
+          <style>@keyframes progress { from{width:0} to{width:100%} }</style>
+
+          <div class="flex flex-col gap-3">
+            <div class="clause-card-high rounded-xl p-3.5" style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);">
+              <div class="flex items-start justify-between gap-2 mb-1.5">
+                <div class="text-xs font-semibold text-white">§4 — IP Assignment</div>
+                <span class="risk-high text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">HIGH RISK</span>
+              </div>
+              <div class="text-xs mb-2" style="color:var(--muted);">"…all work product, including pre-existing IP, shall transfer to Client…"</div>
+              <div class="text-xs rounded-lg px-3 py-2" style="background:rgba(79,79,185,0.15);color:#c7d2fe;">
+                <strong style="color:#818CF8;">Plain English:</strong> You lose ownership of code you wrote before this contract. Add a carve-out for prior work.
+              </div>
+            </div>
+
+            <div class="clause-card-med rounded-xl p-3.5" style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);">
+              <div class="flex items-start justify-between gap-2 mb-1.5">
+                <div class="text-xs font-semibold text-white">§9 — Non-Compete</div>
+                <span class="risk-med text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">MEDIUM</span>
+              </div>
+              <div class="text-xs mb-2" style="color:var(--muted);">"…18 months, 200km radius, any competing business…"</div>
+              <div class="text-xs rounded-lg px-3 py-2" style="background:rgba(79,79,185,0.15);color:#c7d2fe;">
+                <strong style="color:#818CF8;">Plain English:</strong> Overly broad under Ontario law. Negotiate to 6 months and define "competing" narrowly.
+              </div>
+            </div>
+
+            <div class="clause-card-low rounded-xl p-3.5" style="background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2);">
+              <div class="flex items-start justify-between gap-2 mb-1.5">
+                <div class="text-xs font-semibold text-white">§2 — Payment Terms</div>
+                <span class="risk-low text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">LOW</span>
+              </div>
+              <div class="text-xs" style="color:var(--muted);">Net-30 terms, standard late fee of 1.5%/month. Standard and enforceable.</div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-4 pt-4" style="border-top:1px solid var(--border);">
+            <div class="text-xs" style="color:var(--muted);">3 issues found · 2 min ago</div>
+            <button class="btn-primary text-xs font-semibold px-3 py-1.5 rounded-lg">Fix all →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════
+     PROBLEM
+═══════════════════════════════════════════ -->
+<section id="problem" class="py-16 px-6 md:px-12">
+  <div class="max-w-7xl mx-auto">
+    <div data-aos="fade-up" class="text-center mb-10">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4" style="font-weight:700;">
+        Lawyers charge <span class="gradient-text">$349/hour.</span><br/>A contract review takes 2–6 hours.
+      </h2>
+      <p class="text-base max-w-xl mx-auto" style="color:var(--muted);">Most people skip the review entirely. That's how hidden clauses become expensive mistakes.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div data-aos="fade-up" data-aos-delay="0" class="pain-card glass rounded-2xl p-7">
+        <div class="w-12 h-12 rounded-xl mb-5 flex items-center justify-center" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);">
+          <i data-lucide="eye-off" style="color:#f87171;width:22px;height:22px;"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">Most people sign without reading</h3>
+        <p class="text-sm leading-relaxed" style="color:var(--muted);">Over 70% of individuals sign contracts they haven't fully read — not because they're careless, but because legal language is intentionally impenetrable.</p>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="100" class="pain-card glass rounded-2xl p-7">
+        <div class="w-12 h-12 rounded-xl mb-5 flex items-center justify-center" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);">
+          <i data-lucide="alert-triangle" style="color:#fbbf24;width:22px;height:22px;"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">Hidden clauses cost thousands</h3>
+        <p class="text-sm leading-relaxed" style="color:var(--muted);">Auto-renewal traps, unlimited liability, IP grabs, unenforceable non-competes — one bad clause can wipe out months of income or lock you out of your own work.</p>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="200" class="pain-card glass rounded-2xl p-7">
+        <div class="w-12 h-12 rounded-xl mb-5 flex items-center justify-center" style="background:rgba(79,79,185,0.12);border:1px solid rgba(79,79,185,0.25);">
+          <i data-lucide="dollar-sign" style="color:#818CF8;width:22px;height:22px;"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">Lawyers are too expensive for every document</h3>
+        <p class="text-sm leading-relaxed" style="color:var(--muted);">A $600–$2,000 legal review fee makes no sense for a $500 freelance gig or a standard lease. So most people roll the dice. ClearSign closes that gap.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════
+     HOW IT WORKS
+═══════════════════════════════════════════ -->
+<section id="how-it-works" class="py-16 px-6 md:px-12">
+  <div class="max-w-7xl mx-auto">
+    <div data-aos="fade-up" class="text-center mb-10">
+      <div class="badge-pill mx-auto mb-4" style="width:fit-content;">How it works</div>
+      <h2 class="text-3xl md:text-4xl font-bold" style="font-weight:700;">From upload to report in <span class="gradient-text">60 seconds</span></h2>
+    </div>
+
+    <div class="relative grid md:grid-cols-3 gap-8">
+      <!-- Connector line (desktop only) -->
+      <div class="steps-connector"></div>
+
+      <div data-aos="fade-up" data-aos-delay="0" class="flex flex-col items-center text-center gap-5">
+        <!-- Step badge + icon stacked -->
+        <div class="flex flex-col items-center gap-3">
+          <div class="step-number">1</div>
+          <div class="step-icon-box">
+            <i data-lucide="upload-cloud" style="color:#818CF8;width:34px;height:34px;position:relative;z-index:1;"></i>
+          </div>
+          <!-- Arrow pointing right (hidden on last step / mobile) -->
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-white mb-2">Upload your document</h3>
+          <p class="text-sm leading-relaxed" style="color:var(--muted);">Drag and drop a PDF or Word doc. No account required to try. Works with contracts, NDAs, leases, employment offers, and more.</p>
+        </div>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="150" class="flex flex-col items-center text-center gap-5">
+        <div class="flex flex-col items-center gap-3">
+          <div class="step-number">2</div>
+          <div class="step-icon-box">
+            <i data-lucide="cpu" style="color:#818CF8;width:34px;height:34px;position:relative;z-index:1;"></i>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-white mb-2">AI reads every clause</h3>
+          <p class="text-sm leading-relaxed" style="color:var(--muted);">Our model is trained on Canadian and US case law, provincial employment standards, and thousands of commercial contracts. Every clause gets reviewed.</p>
+        </div>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="300" class="flex flex-col items-center text-center gap-5">
+        <div class="flex flex-col items-center gap-3">
+          <div class="step-number">3</div>
+          <div class="step-icon-box">
+            <i data-lucide="file-check" style="color:#818CF8;width:34px;height:34px;position:relative;z-index:1;"></i>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-white mb-2">Get your risk report</h3>
+          <p class="text-sm leading-relaxed" style="color:var(--muted);">Receive a plain English summary, risk-rated flags (High / Medium / Low), and specific suggested edits — so you know exactly what to negotiate.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile step arrows -->
+    <div class="flex md:hidden justify-center mt-6 gap-2">
+      <div class="w-2 h-2 rounded-full" style="background:var(--accent);"></div>
+      <div class="w-2 h-2 rounded-full" style="background:rgba(79,79,185,0.4);"></div>
+      <div class="w-2 h-2 rounded-full" style="background:rgba(79,79,185,0.4);"></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════
+     WHO IT'S FOR
+═══════════════════════════════════════════ -->
+<section id="who" class="py-16 px-6 md:px-12">
+  <div class="max-w-7xl mx-auto">
+    <div data-aos="fade-up" class="text-center mb-10">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4" style="font-weight:700;">Built for <span class="gradient-text">everyone</span> who signs contracts</h2>
+      <p class="text-base" style="color:var(--muted);">You shouldn't need a law degree to protect yourself.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div data-aos="fade-up" data-aos-delay="0" class="glass rounded-2xl p-6" style="transition:border-color 0.2s;">
+        <div class="w-11 h-11 rounded-xl mb-4 flex items-center justify-center" style="background:rgba(79,79,185,0.15);">
+          <i data-lucide="code-2" style="color:#818CF8;width:20px;height:20px;"></i>
+        </div>
+        <h3 class="text-base font-semibold text-white mb-2">IT Freelancers</h3>
+        <p class="text-sm leading-relaxed" style="color:var(--muted);">NDA terms, MSA liability caps, IP assignment clauses, payment disputes — get clarity before you start a project.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4">
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">NDA</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">MSA</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">IP Assignment</span>
+        </div>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="100" class="glass rounded-2xl p-6">
+        <div class="w-11 h-11 rounded-xl mb-4 flex items-center justify-center" style="background:rgba(79,79,185,0.15);">
+          <i data-lucide="building-2" style="color:#818CF8;width:20px;height:20px;"></i>
+        </div>
+        <h3 class="text-base font-semibold text-white mb-2">Small Business</h3>
+        <p class="text-sm leading-relaxed" style="color:var(--muted);">Vendor contracts, SaaS terms, supplier agreements, partnership deals — protect your margins and stay compliant.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4">
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">Vendor</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">SaaS</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">Compliance</span>
+        </div>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="200" class="glass rounded-2xl p-6">
+        <div class="w-11 h-11 rounded-xl mb-4 flex items-center justify-center" style="background:rgba(79,79,185,0.15);">
+          <i data-lucide="home" style="color:#818CF8;width:20px;height:20px;"></i>
+        </div>
+        <h3 class="text-base font-semibold text-white mb-2">Renters</h3>
+        <p class="text-sm leading-relaxed" style="color:var(--muted);">Understand lease agreements, catch hidden fees, spot illegal clauses, and know your rights under provincial tenancy law.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4">
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">Lease</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">Hidden Fees</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">RTA</span>
+        </div>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="300" class="glass rounded-2xl p-6">
+        <div class="w-11 h-11 rounded-xl mb-4 flex items-center justify-center" style="background:rgba(79,79,185,0.15);">
+          <i data-lucide="briefcase" style="color:#818CF8;width:20px;height:20px;"></i>
+        </div>
+        <h3 class="text-base font-semibold text-white mb-2">New Employees</h3>
+        <p class="text-sm leading-relaxed" style="color:var(--muted);">Non-compete scope, termination pay, IP ownership — know what you're agreeing to before your first day on the job.</p>
+        <div class="flex flex-wrap gap-1.5 mt-4">
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">Non-Compete</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">IP</span>
+          <span class="text-xs px-2 py-0.5 rounded-full" style="background:rgba(79,79,185,0.12);color:#818CF8;">ESA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════
+     CANADA SECTION
+═══════════════════════════════════════════ -->
+<section id="canada" class="py-16 px-6 md:px-12">
+  <div class="max-w-7xl mx-auto">
+    <div data-aos="fade-up" class="accent-block rounded-3xl p-10 md:p-14">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <div class="badge-pill mb-5" style="width:fit-content;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            Canadian-first
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold mb-5" style="font-weight:700;">
+            Built for Canadian law.<br/>
+            <span class="gradient-text">Not a US tool with a maple leaf.</span>
+          </h2>
+          <p class="text-base leading-relaxed" style="color:var(--muted);">Most AI legal tools are trained exclusively on US law and bolt on a "Canada" option as an afterthought. ClearSign was built from the ground up with provincial jurisdiction awareness, bilingual contract support, and federal compliance baked in.</p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div data-aos="fade-left" data-aos-delay="0" class="glass rounded-xl p-5">
+            <i data-lucide="map-pin" style="color:#818CF8;width:20px;height:20px;" class="mb-3 block"></i>
+            <h4 class="text-sm font-semibold text-white mb-1.5">Provincial Employment Standards</h4>
+            <p class="text-xs leading-relaxed" style="color:var(--muted);">Ontario ESA, BC Employment Standards Act, Alberta Employment Standards — flags violations specific to your province.</p>
+          </div>
+
+          <div data-aos="fade-left" data-aos-delay="100" class="glass rounded-xl p-5">
+            <i data-lucide="landmark" style="color:#818CF8;width:20px;height:20px;" class="mb-3 block"></i>
+            <h4 class="text-sm font-semibold text-white mb-1.5">Federal Compliance</h4>
+            <p class="text-xs leading-relaxed" style="color:var(--muted);">PIPEDA / Bill C-27 privacy obligations, Canada Labour Code, CASL compliance in contracts reviewed automatically.</p>
+          </div>
+
+          <div data-aos="fade-left" data-aos-delay="200" class="glass rounded-xl p-5">
+            <i data-lucide="receipt" style="color:#818CF8;width:20px;height:20px;" class="mb-3 block"></i>
+            <h4 class="text-sm font-semibold text-white mb-1.5">GST/HST in Contracts</h4>
+            <p class="text-xs leading-relaxed" style="color:var(--muted);">Catches ambiguous tax language, missing HST clauses, and payment terms that expose you to unexpected tax liability.</p>
+          </div>
+
+          <div data-aos="fade-left" data-aos-delay="300" class="glass rounded-xl p-5">
+            <i data-lucide="flag" style="color:#818CF8;width:20px;height:20px;" class="mb-3 block"></i>
+            <h4 class="text-sm font-semibold text-white mb-1.5">Provincial Risk Flags</h4>
+            <p class="text-xs leading-relaxed" style="color:var(--muted);">Non-compete enforceability varies by province. We flag clauses that are unenforceable under your jurisdiction's case law.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════
+     FAQ
+═══════════════════════════════════════════ -->
+<section id="faq" class="py-16 px-6 md:px-12">
+  <div class="max-w-3xl mx-auto">
+    <div data-aos="fade-up" class="text-center mb-10">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4" style="font-weight:700;">Frequently asked <span class="gradient-text">questions</span></h2>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <div data-aos="fade-up" data-aos-delay="0" class="faq-item glass rounded-xl overflow-hidden">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+          <span class="text-base font-semibold text-white pr-4">Does this replace a lawyer?</span>
+          <i data-lucide="plus" class="faq-icon flex-shrink-0" style="color:#818CF8;width:20px;height:20px;"></i>
+        </button>
+        <div class="faq-answer px-6">
+          <p class="text-sm leading-relaxed pb-6" style="color:var(--muted);">No, and we're clear about that. ClearSign is a first-pass risk tool — it flags what to look at, explains what clauses mean, and suggests edits. For high-stakes contracts (M&A, complex IP, litigation risk), you should still use a lawyer. Think of us as the smart friend who reads the contract before you spend $600 on legal review — or who tells you whether you even need to.</p>
+        </div>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="50" class="faq-item glass rounded-xl overflow-hidden">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+          <span class="text-base font-semibold text-white pr-4">Is my contract data secure?</span>
+          <i data-lucide="plus" class="faq-icon flex-shrink-0" style="color:#818CF8;width:20px;height:20px;"></i>
+        </button>
+        <div class="faq-answer px-6">
+          <p class="text-sm leading-relaxed pb-6" style="color:var(--muted);">Your documents are encrypted in transit (TLS 1.3) and at rest (AES-256). We process documents in isolated environments and never use your contract data to train our models. Documents are deleted from our servers within 24 hours of processing on the Free plan. Pro and Business users can configure custom retention policies. We are SOC 2 Type II compliant.</p>
+        </div>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="100" class="faq-item glass rounded-xl overflow-hidden">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+          <span class="text-base font-semibold text-white pr-4">Does it work for Canadian provincial law?</span>
+          <i data-lucide="plus" class="faq-icon flex-shrink-0" style="color:#818CF8;width:20px;height:20px;"></i>
+        </button>
+        <div class="faq-answer px-6">
+          <p class="text-sm leading-relaxed pb-6" style="color:var(--muted);">Yes — and this is our core differentiator. ClearSign covers all 10 provinces and 3 territories. When you upload a contract, you specify your province. Our model applies the relevant Employment Standards Act, residential tenancy rules, and case law for your jurisdiction. Ontario, BC, Alberta, Quebec (including French-language contracts), and more are fully supported.</p>
+        </div>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="150" class="faq-item glass rounded-xl overflow-hidden">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+          <span class="text-base font-semibold text-white pr-4">What file formats are supported?</span>
+          <i data-lucide="plus" class="faq-icon flex-shrink-0" style="color:#818CF8;width:20px;height:20px;"></i>
+        </button>
+        <div class="faq-answer px-6">
+          <p class="text-sm leading-relaxed pb-6" style="color:var(--muted);">We support PDF (including scanned PDFs via OCR), Microsoft Word (.docx, .doc), Google Docs (via link or export), and plain text (.txt). Scanned PDFs with handwritten annotations are processed with our OCR pipeline at slightly lower accuracy. Maximum file size is 50MB. We do not yet support Excel or PowerPoint files — those are on our roadmap.</p>
+        </div>
+      </div>
+
+      <div data-aos="fade-up" data-aos-delay="200" class="faq-item glass rounded-xl overflow-hidden">
+        <button class="faq-trigger w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+          <span class="text-base font-semibold text-white pr-4">How accurate is the AI?</span>
+          <i data-lucide="plus" class="faq-icon flex-shrink-0" style="color:#818CF8;width:20px;height:20px;"></i>
+        </button>
+        <div class="faq-answer px-6">
+          <p class="text-sm leading-relaxed pb-6" style="color:var(--muted);">In our internal testing against a corpus of 1,200 commercial contracts reviewed by qualified lawyers, ClearSign correctly identified 94% of high-risk clauses and achieved 89% accuracy on suggested edit quality. Our false positive rate (flagging something as risky when it isn't) is around 8% — we'd rather you look at something twice than miss a real issue. Accuracy improves with contract type; standard employment agreements and NDAs score highest.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════
+     PRICING
+═══════════════════════════════════════════ -->
+<section id="pricing" class="py-16 px-6 md:px-12">
+  <div class="max-w-7xl mx-auto">
+    <div data-aos="fade-up" class="text-center mb-10">
+      <p class="text-sm font-medium mb-3" style="color:var(--muted);">Simple pricing. No hidden fees. Cancel any time.</p>
+      <h2 class="text-3xl md:text-4xl font-bold mb-4" style="font-weight:700;">Simple, honest <span class="gradient-text">pricing</span></h2>
+      <p class="text-base" style="color:var(--muted);">No hidden fees. No surprise charges. Cancel any time.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 items-start">
+      <div data-aos="zoom-in" data-aos-delay="0" class="pricing-card rounded-2xl p-7">
+        <div class="text-sm font-semibold mb-1" style="color:var(--muted);">Free</div>
+        <div class="text-4xl text-white mb-1" style="font-weight:800;">$0</div>
+        <div class="text-xs mb-6" style="color:var(--muted);">forever</div>
+        <ul class="flex flex-col gap-3 mb-8">
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> 2 documents / month</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Risk flags (High/Med/Low)</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Plain English summary</li>
+          <li class="flex items-center gap-2 text-sm" style="color:var(--muted);"><i data-lucide="x" style="color:var(--muted);width:15px;height:15px;flex-shrink:0;"></i> Suggested edits</li>
+          <li class="flex items-center gap-2 text-sm" style="color:var(--muted);"><i data-lucide="x" style="color:var(--muted);width:15px;height:15px;flex-shrink:0;"></i> Provincial law context</li>
+        </ul>
+        <a href="#waitlist" class="btn-ghost text-sm font-semibold px-4 py-2.5 rounded-lg block text-center no-underline">Get started</a>
+      </div>
+
+      <div data-aos="zoom-in" data-aos-delay="100" class="pricing-card rounded-2xl p-7">
+        <div class="text-sm font-semibold mb-1" style="color:var(--muted);">Pay-per-use</div>
+        <div class="text-4xl text-white mb-1" style="font-weight:800;">$9</div>
+        <div class="text-xs mb-6" style="color:var(--muted);">per document</div>
+        <ul class="flex flex-col gap-3 mb-8">
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Unlimited single docs</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Full risk analysis</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Suggested edits</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Provincial context</li>
+          <li class="flex items-center gap-2 text-sm" style="color:var(--muted);"><i data-lucide="x" style="color:var(--muted);width:15px;height:15px;flex-shrink:0;"></i> History & exports</li>
+        </ul>
+        <a href="#waitlist" class="btn-ghost text-sm font-semibold px-4 py-2.5 rounded-lg block text-center no-underline">Get started</a>
+      </div>
+
+      <div data-aos="zoom-in" data-aos-delay="200" class="pricing-card featured rounded-2xl p-7 relative">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span class="text-xs font-bold px-3 py-1 rounded-full text-white" style="background:var(--accent);">MOST POPULAR</span>
+        </div>
+        <div class="text-sm font-semibold mb-1" style="color:#818CF8;">Pro</div>
+        <div class="text-4xl text-white mb-1" style="font-weight:800;">$24</div>
+        <div class="text-xs mb-6" style="color:var(--muted);">per month</div>
+        <ul class="flex flex-col gap-3 mb-8">
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Unlimited documents</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Full risk analysis</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Suggested edits + redline</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Provincial law context</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> History, export, share</li>
+        </ul>
+        <a href="#waitlist" class="btn-primary text-sm font-semibold px-4 py-2.5 rounded-lg block text-center no-underline">Start free trial</a>
+      </div>
+
+      <div data-aos="zoom-in" data-aos-delay="300" class="pricing-card rounded-2xl p-7">
+        <div class="text-sm font-semibold mb-1" style="color:var(--muted);">Business</div>
+        <div class="text-4xl text-white mb-1" style="font-weight:800;">$49</div>
+        <div class="text-xs mb-6" style="color:var(--muted);">per month</div>
+        <ul class="flex flex-col gap-3 mb-8">
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Everything in Pro</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> 5 team seats</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Team contract library</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Bulk upload (API)</li>
+          <li class="flex items-center gap-2 text-sm text-white"><i data-lucide="check" style="color:#4ade80;width:15px;height:15px;flex-shrink:0;"></i> Priority support</li>
+        </ul>
+        <a href="#waitlist" class="btn-ghost text-sm font-semibold px-4 py-2.5 rounded-lg block text-center no-underline">Contact us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ══════════════════════════════════════════
+     FINAL CTA / WAITLIST
+═══════════════════════════════════════════ -->
+<section id="waitlist" class="py-16 px-6 md:px-12">
+  <div class="max-w-2xl mx-auto text-center">
+    <div data-aos="zoom-in">
+      <div class="badge-pill mx-auto mb-6" style="width:fit-content;">
+        <i data-lucide="gift" style="width:14px;height:14px;"></i>
+        Limited time offer
+      </div>
+      <h2 class="text-3xl md:text-4xl font-bold mb-5" style="font-weight:700;">
+        Get 3 months of Pro free —<br/>
+        <span class="gradient-text">first 100 spots</span>
+      </h2>
+      <p class="text-base mb-4" style="color:var(--muted);">No credit card. No commitment. Cancel any time.</p>
+
+      <!-- Countdown -->
+      <div class="mb-5">
+        <p class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:var(--muted);">Closing early access in:</p>
+        <div class="countdown-block" id="countdown-wrap">
+          <div class="countdown-unit"><span class="countdown-num" id="cd-days">30</span><span class="countdown-label">Days</span></div>
+          <div class="countdown-unit"><span class="countdown-num" id="cd-hours">00</span><span class="countdown-label">Hours</span></div>
+          <div class="countdown-unit"><span class="countdown-num" id="cd-mins">00</span><span class="countdown-label">Minutes</span></div>
+          <div class="countdown-unit"><span class="countdown-num" id="cd-secs">00</span><span class="countdown-label">Seconds</span></div>
+        </div>
+      </div>
+
+      <div class="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full" style="background:rgba(79,79,185,0.1);border:1px solid rgba(79,79,185,0.25);">
+        <span class="w-2 h-2 rounded-full animate-pulse" style="background:#4ade80;"></span>
+        <span class="text-sm text-white"><strong id="spots-remaining">100</strong> early access spots left</span>
+      </div>
+
+      <div id="waitlist-form-wrap">
+        <form id="waitlist-form" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onsubmit="handleSignup(event,'waitlist')">
+          <input type="email" id="waitlist-email" placeholder="Enter your email" required
+            class="email-input flex-1 px-4 py-3.5 rounded-xl text-sm" />
+          <button type="submit" class="btn-primary text-sm font-semibold px-6 py-3.5 rounded-xl whitespace-nowrap">
+            Get early access free
+          </button>
+        </form>
+      </div>
+      <div id="waitlist-success" class="form-success-state max-w-md mx-auto mt-2" style="display:none;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div style="text-align:left;">
+          <p class="text-sm font-semibold" style="color:#4ade80;">You're in!</p>
+          <p class="text-xs mt-1" style="color:#86efac;">We'll email you the moment ClearSign launches. You're <strong id="waitlist-position">#248</strong> in line.</p>
+        </div>
+      </div>
+      <p class="text-xs mt-4" style="color:var(--muted);">By joining you agree to our Privacy Policy. We never sell your data.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer class="py-12 px-6 md:px-12" style="border-top:1px solid var(--border);">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-4 gap-10 mb-10">
+      <div class="md:col-span-2">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--accent);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <span class="text-white font-bold text-lg">ClearSign</span>
+        </div>
+        <p class="text-sm leading-relaxed max-w-xs" style="color:var(--muted);">AI contract review built for Canadian and US law. Understand any document in plain English before you sign.</p>
+      </div>
+
+      <div>
+        <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:var(--muted);">Product</div>
+        <ul class="flex flex-col gap-2.5" style="list-style:none;padding:0;margin:0;">
+          <li><a href="#how-it-works" class="text-sm transition-colors hover:text-white" style="color:var(--muted);text-decoration:none;">How it works</a></li>
+          <li><a href="#pricing" class="text-sm transition-colors hover:text-white" style="color:var(--muted);text-decoration:none;">Pricing</a></li>
+          <li><a href="#faq" class="text-sm transition-colors hover:text-white" style="color:var(--muted);text-decoration:none;">FAQ</a></li>
+          <li><a href="#waitlist" class="text-sm transition-colors hover:text-white" style="color:var(--muted);text-decoration:none;">Join waitlist</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:var(--muted);">Legal</div>
+        <ul class="flex flex-col gap-2.5" style="list-style:none;padding:0;margin:0;">
+          <li><a href="#" class="text-sm transition-colors hover:text-white" style="color:var(--muted);text-decoration:none;">Privacy Policy</a></li>
+          <li><a href="#" class="text-sm transition-colors hover:text-white" style="color:var(--muted);text-decoration:none;">Terms of Service</a></li>
+          <li><a href="#" class="text-sm transition-colors hover:text-white" style="color:var(--muted);text-decoration:none;">Cookie Policy</a></li>
+          <li><a href="#" class="text-sm transition-colors hover:text-white" style="color:var(--muted);text-decoration:none;">Security</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8" style="border-top:1px solid var(--border);">
+      <p class="text-xs" style="color:var(--muted);">© 2026 ClearSign Technologies Inc. All rights reserved.</p>
+      <p class="text-xs" style="color:var(--muted);">ClearSign is not a law firm and does not provide legal advice.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<script>
+  lucide.createIcons();
+  AOS.init({ offset: 80, duration: 650, once: true, easing: 'ease-out-quad' });
+
+  // ── WAITLIST COUNTER ──
+  const TOTAL_SPOTS = 100;
+  const BASE_COUNT  = 247;
+  function getEmails() {
+    try { return JSON.parse(localStorage.getItem('clearsign_waitlist') || '[]'); } catch { return []; }
+  }
+  function updateCounters() {
+    const emails   = getEmails();
+    const total    = BASE_COUNT + emails.length;
+    const spotsLeft = Math.max(0, TOTAL_SPOTS - emails.length);
+    document.getElementById('waitlist-count-hero').textContent = total;
+    document.getElementById('spots-remaining').textContent = spotsLeft;
+  }
+  updateCounters();
+
+  // ── EMAIL SIGNUP ──
+  function handleSignup(e, source) {
+    e.preventDefault();
+    const isHero    = source === 'hero';
+    const emailEl   = document.getElementById(isHero ? 'hero-email' : 'waitlist-email');
+    const successEl = document.getElementById(isHero ? 'hero-success' : 'waitlist-success');
+    const email     = emailEl.value.trim();
+    if (!email) return;
+
+    const emails = getEmails();
+    let position = BASE_COUNT + emails.length + 1;
+    if (!emails.includes(email)) {
+      emails.push(email);
+      localStorage.setItem('clearsign_waitlist', JSON.stringify(emails));
+    } else {
+      position = BASE_COUNT + emails.indexOf(email) + 1;
+    }
+    updateCounters();
+
+    if (isHero) {
+      // Hide form, show rich success
+      document.getElementById('hero-form').style.display = 'none';
+      document.getElementById('hero-position').textContent = '#' + position;
+      successEl.classList.add('show');
+    } else {
+      // Hide form wrap, show rich success
+      document.getElementById('waitlist-form-wrap').style.display = 'none';
+      document.getElementById('waitlist-position').textContent = '#' + position;
+      successEl.style.display = 'flex';
+    }
+  }
+
+  // ── COUNTDOWN TIMER ──
+  (function initCountdown() {
+    const KEY = 'clearsign_launch_target';
+    let target = localStorage.getItem(KEY);
+    if (!target) {
+      // 30 days from first visit
+      target = Date.now() + 72 * 60 * 60 * 1000;
+      localStorage.setItem(KEY, target);
+    }
+    target = parseInt(target, 10);
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function tick() {
+      const diff = target - Date.now();
+      if (diff <= 0) {
+        ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => {
+          document.getElementById(id).textContent = '00';
+        });
+        return;
+      }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000)  / 60000);
+      const s = Math.floor((diff % 60000)    / 1000);
+      document.getElementById('cd-days').textContent  = pad(d);
+      document.getElementById('cd-hours').textContent = pad(h);
+      document.getElementById('cd-mins').textContent  = pad(m);
+      document.getElementById('cd-secs').textContent  = pad(s);
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
+
+  // Hero entrance is handled by pure CSS animation (no JS dependency).
+  // GSAP is available for scroll-triggered enhancements if needed.
+
+  // ── PARTICLES ──
+  (function() {
+    const c = document.getElementById('particles-container');
+    for (let i = 0; i < 22; i++) {
+      const p = document.createElement('div');
+      p.classList.add('particle');
+      const size = Math.random() * 3 + 1.5;
+      p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${Math.random()*18+10}s;animation-delay:${Math.random()*12}s;opacity:0;`;
+      c.appendChild(p);
+    }
+  })();
+
+  // ── NAV SCROLL ──
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 30); }, { passive: true });
+
+  // ── MOBILE MENU ──
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  let menuOpen = false;
+  hamburger.addEventListener('click', () => {
+    menuOpen = !menuOpen;
+    mobileMenu.classList.toggle('open', menuOpen);
+    const spans = hamburger.querySelectorAll('span');
+    if (menuOpen) {
+      spans[0].style.cssText = 'transform:translateY(8px) rotate(45deg);';
+      spans[1].style.cssText = 'opacity:0;';
+      spans[2].style.cssText = 'transform:translateY(-8px) rotate(-45deg);';
+    } else {
+      spans.forEach(s => s.style.cssText = '');
+    }
+  });
+  function closeMobileMenu() {
+    menuOpen = false;
+    mobileMenu.classList.remove('open');
+    hamburger.querySelectorAll('span').forEach(s => s.style.cssText = '');
+  }
+  document.addEventListener('click', (e) => {
+    if (menuOpen && !mobileMenu.contains(e.target) && !hamburger.contains(e.target)) closeMobileMenu();
+  });
+
+  // ── FAQ ACCORDION ──
+  function toggleFaq(trigger) {
+    const item = trigger.closest('.faq-item');
+    const answer = item.querySelector('.faq-answer');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(fi => {
+      fi.classList.remove('open');
+      fi.querySelector('.faq-answer').classList.remove('open');
+    });
+    if (!isOpen) {
+      item.classList.add('open');
+      answer.classList.add('open');
+    }
+    lucide.createIcons();
+  }
+</script>
+<style>
+.cursor{animation:blink 0.7s infinite;color:#4F4FB9;font-weight:300;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+<script>
+(function(){
+  var el = document.getElementById('hero-title');
+  if(!el) return;
+  var part1 = 'Never sign a document ';
+  var part2 = 'blind again';
+  var full = part1 + part2;
+  var i = 0;
+  function tick(){
+    if(i <= full.length){
+      var p = full.substring(0, Math.min(i, part1.length));
+      var g = i > part1.length ? '<span class="gradient-text">'+full.substring(part1.length, i)+'</span>' : '';
+      el.innerHTML = p + g + '<span class="cursor">|</span>';
+      i++;
+      setTimeout(tick, 65);
+    } else {
+      setTimeout(function(){
+        var c = el.querySelector('.cursor');
+        if(c) c.remove();
+      }, 2000);
+    }
+  }
+  window.addEventListener('load', tick);
+})();
+</script>
+</body>
+</html>
